@@ -51,7 +51,7 @@ class Dishes:
     query = 'DELETE FROM dishes WHERE id = ?'
     self.db_manager.execute_query(query, (dish_id,))
 
-  def list_dishes(self):
+  def get_all_dishes(self):
     """Возвращает список всех блюд."""
     query = 'SELECT * FROM dishes'
     return self.db_manager.execute_query(query, fetchall=True)
