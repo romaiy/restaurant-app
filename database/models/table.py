@@ -1,14 +1,8 @@
-from database.db_manager import DBManager
+from database.models.base_model import BaseModel
 
-class Table:
-  def __init__(self, db_manager: DBManager):
-    """
-    Инициализация класса Table.
-    :param db_manager: Экземпляр DBManager для взаимодействия с базой данных.
-    """
-    self.db_manager = db_manager
+class Table(BaseModel):
 
-  def add_table(self, table_number):
+  def add(self, table_number):
     """Добавляет новый стол в таблицу."""
     query = '''
     INSERT INTO tables (table_number) VALUES (?)
@@ -16,7 +10,7 @@ class Table:
     self.db_manager.execute_query(query, (table_number,))
     return self.db_manager.cursor.lastrowid
 
-  def update_table(self, table_id, table_number):
+  def update(self, table_id, **table_number):
     """Обновляет номер стола по ID."""
     query = '''
     UPDATE tables
@@ -25,7 +19,7 @@ class Table:
     '''
     self.db_manager.execute_query(query, (table_number, table_id))
 
-  def delete_table(self, table_id):
+  def delete(self, table_id):
     """Удаляет стол из таблицы по ID."""
     query = '''
     DELETE FROM tables
@@ -33,7 +27,7 @@ class Table:
     '''
     self.db_manager.execute_query(query, (table_id,))
 
-  def get_table(self, table_id):
+  def get(self, table_id):
     """Получает информацию о столе по ID."""
     query = '''
     SELECT * FROM tables
@@ -41,7 +35,7 @@ class Table:
     '''
     return self.db_manager.execute_query(query, (table_id,), fetchone=True)
 
-  def get_all_tables(self):
+  def get_list(self):
     """Получает список всех столов."""
     query = 'SELECT * FROM tables'
     return self.db_manager.execute_query(query, fetchall=True)

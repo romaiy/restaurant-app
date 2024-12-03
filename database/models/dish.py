@@ -1,14 +1,8 @@
-from database.db_manager import DBManager
+from database.models.base_model import BaseModel
 
-class Dishes:
-  def __init__(self, db_manager: DBManager):
-    """
-    Инициализация класса Dishes.
-    :param db_manager: Экземпляр DBManager для взаимодействия с базой данных.
-    """
-    self.db_manager = db_manager
+class Dishes(BaseModel):
 
-  def add_dish(self, name, price, is_allergenic, description):
+  def add(self, name, price, is_allergenic, description):
     """Добавляет новое блюдо в таблицу dishes."""
     query = '''
     INSERT INTO dishes (name, price, is_allergenic, description)
@@ -16,12 +10,12 @@ class Dishes:
     '''
     self.db_manager.execute_query(query, (name, price, is_allergenic, description))
 
-  def get_dish(self, dish_id):
+  def get(self, dish_id):
     """Получает информацию о блюде по его id."""
     query = 'SELECT * FROM dishes WHERE id = ?'
     return self.db_manager.execute_query(query, (dish_id,), fetchone=True)
 
-  def update_dish(self, dish_id, name=None, price=None, is_allergenic=None, description=None):
+  def update(self, dish_id, name=None, price=None, is_allergenic=None, description=None):
     """Обновляет информацию о блюде."""
     query = 'UPDATE dishes SET '
     fields = []
@@ -46,12 +40,12 @@ class Dishes:
       values.append(dish_id)
       self.db_manager.execute_query(query, values)
 
-  def delete_dish(self, dish_id):
+  def delete(self, dish_id):
     """Удаляет блюдо по его id."""
     query = 'DELETE FROM dishes WHERE id = ?'
     self.db_manager.execute_query(query, (dish_id,))
 
-  def get_all_dishes(self):
+  def get_list(self):
     """Возвращает список всех блюд."""
     query = 'SELECT * FROM dishes'
     return self.db_manager.execute_query(query, fetchall=True)

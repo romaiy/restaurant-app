@@ -1,14 +1,8 @@
-from database.db_manager import DBManager
+from database.models.base_model import BaseModel
 
-class Employee:
-  def __init__(self, db_manager: DBManager):
-    """
-    Инициализация класса Employee.
-    :param db_manager: Экземпляр DBManager для взаимодействия с базой данных.
-    """
-    self.db_manager = db_manager
+class Employee(BaseModel):
 
-  def add_employee(self, name):
+  def add(self, name):
     """Добавляет нового сотрудника в таблицу."""
     query = '''
     INSERT INTO employees (name) VALUES (?)
@@ -16,7 +10,7 @@ class Employee:
     self.db_manager.execute_query(query, (name,))
     return self.db_manager.cursor.lastrowid
 
-  def update_employee(self, emp_id, name):
+  def update(self, emp_id, **name):
     """Обновляет информацию о сотруднике по ID."""
     query = '''
     UPDATE employees
@@ -25,7 +19,7 @@ class Employee:
     '''
     self.db_manager.execute_query(query, (name, emp_id))
 
-  def delete_employee(self, emp_id):
+  def delete(self, emp_id):
     """Удаляет сотрудника из таблицы по ID."""
     query = '''
     DELETE FROM employees
@@ -33,7 +27,7 @@ class Employee:
     '''
     self.db_manager.execute_query(query, (emp_id,))
 
-  def get_employee(self, emp_id):
+  def get(self, emp_id):
     """Получает информацию о сотруднике по ID."""
     query = '''
     SELECT * FROM employees
@@ -41,7 +35,7 @@ class Employee:
     '''
     return self.db_manager.execute_query(query, (emp_id,), fetchone=True)
 
-  def get_all_employees(self):
+  def get_list(self):
     """Получает список всех сотрудников."""
     query = 'SELECT * FROM employees'
     return self.db_manager.execute_query(query, fetchall=True)

@@ -1,14 +1,8 @@
-from database.db_manager import DBManager
+from database.models.base_model import BaseModel
 
-class Order:
-  def __init__(self, db_manager: DBManager):
-    """
-    Инициализация класса Order.
-    :param db_manager: Экземпляр DBManager для взаимодействия с базой данных.
-    """
-    self.db_manager = db_manager
+class Order(BaseModel):
 
-  def add_order(self, table_id, employee_id, status, created_at):
+  def add(self, table_id, employee_id, status, created_at):
     """
     Создаёт новый заказ.
     :param table_id: ID стола.
@@ -24,7 +18,7 @@ class Order:
     self.db_manager.execute_query(query, (table_id, employee_id, status, created_at))
     return self.db_manager.cursor.lastrowid
 
-  def update_order_status(self, order_id, status):
+  def update(self, order_id, **status):
     """
     Обновляет статус заказа.
     :param order_id: ID заказа.
@@ -37,7 +31,7 @@ class Order:
     '''
     self.db_manager.execute_query(query, (status, order_id))
 
-  def delete_order(self, order_id):
+  def delete(self, order_id):
     """
     Удаляет заказ по его ID.
     :param order_id: ID заказа.
@@ -48,7 +42,7 @@ class Order:
     '''
     self.db_manager.execute_query(query, (order_id,))
 
-  def get_order(self, order_id):
+  def get(self, order_id):
     """
     Получает информацию о заказе по его ID.
     :param order_id: ID заказа.
@@ -60,7 +54,7 @@ class Order:
     '''
     return self.db_manager.execute_query(query, (order_id,), fetchone=True)
 
-  def get_all_orders(self):
+  def get_list(self):
     """
     Получает список всех заказов.
     :return: Список словарей с информацией о заказах.
