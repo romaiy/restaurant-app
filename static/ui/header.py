@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal
 
 
 class Header(QWidget):
@@ -18,12 +18,17 @@ class Header(QWidget):
 
         layout.setContentsMargins(32, 20, 32, 20)
         layout.setSpacing(0)
+        layout.setAlignment(Qt.AlignLeft)
         layout.setObjectName("root")
 
         # Создаем кнопки навигации
         self.tables_button = QPushButton("Столики", self)
         self.orders_button = QPushButton("Заказы", self)
         self.dishes_button = QPushButton("Блюда", self)
+
+        self.tables_button.setFixedSize(107, 51)
+        self.orders_button.setFixedSize(97, 51)
+        self.dishes_button.setFixedSize(93, 51)
 
         self.set_default_styles()
 
@@ -48,7 +53,6 @@ class Header(QWidget):
                 color: #2E2E2E;
                 border-radius: 20px;
                 padding: 16px;
-                width: 20%;
                 font-size: 14px;
             }  
         """)
@@ -57,6 +61,6 @@ class Header(QWidget):
         """Устанавливает стиль для активной кнопки."""
         for button in [self.tables_button, self.orders_button, self.dishes_button]:
             if button == active_button:
-                button.setStyleSheet("background-color: lightblue; color: #007AFF")
+                button.setStyleSheet("background-color: rgba(228, 241, 255, 1); color: #007AFF")
             else:
                 button.setStyleSheet("background-color: none; color: #2E2E2E")
