@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFrame, QVBoxLayout
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QCursor
 
 
 class Header(QWidget):
@@ -31,6 +32,10 @@ class Header(QWidget):
         self.orders_button = QPushButton("Заказы")
         self.dishes_button = QPushButton("Блюда")
 
+        self.tables_button.setCursor(QCursor(Qt.PointingHandCursor))
+        self.orders_button.setCursor(QCursor(Qt.PointingHandCursor))
+        self.dishes_button.setCursor(QCursor(Qt.PointingHandCursor))
+
         self.tables_button.setFixedSize(107, 51)
         self.orders_button.setFixedSize(97, 51)
         self.dishes_button.setFixedSize(93, 51)
@@ -51,7 +56,7 @@ class Header(QWidget):
 
         # Устанавливаем начальную активную кнопку
         self.set_active_button(self.tables_button)
-        
+
         self.setLayout(QVBoxLayout())
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.layout().addWidget(frame)

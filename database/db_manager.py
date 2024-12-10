@@ -13,6 +13,7 @@ class DBManager:
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         price REAL NOT NULL,
+        gram INTEGER NOT NULL,
         is_allergenic BOOLEAN NOT NULL,
         description TEXT
       )

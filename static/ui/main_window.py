@@ -1,8 +1,10 @@
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QStackedWidget, QWidget
+
 from static.ui.header import Header
 from static.pages.tables_page import TablesPage
 from static.pages.orders_page import OrdersPage
 from static.pages.dishes_page import DishesPage
+from static.pages.add_dish_page import AddDishPage
 
 class MainWindow(QMainWindow):
     def __init__(self, models, parent=None):
@@ -29,6 +31,14 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.stackedWidget)
 
         # Создаем страницы
+        self.pages = {
+            "tables": TablesPage(self.models, self),
+            "orders": OrdersPage(self.models,  self),
+            "dishes": DishesPage(self.models, self),
+        }
+
+        self.pages["dishes"].addButtonClicked.connect(self.switch_page)
+
         self.setup_pages()
 
         # Подключаем сигналы навигации из Header
@@ -39,16 +49,18 @@ class MainWindow(QMainWindow):
 
     def setup_pages(self):
         """Создаем страницы."""
-        self.stackedWidget.addWidget(TablesPage(self.models, self))  # Страница "Столики"
-        self.stackedWidget.addWidget(OrdersPage(self.models, self))  # Страница "Заказы"
-        self.stackedWidget.addWidget(DishesPage(self.models, self))  # Страница "Блюда"
+        self.stackedWidget.addWidget(self.pages["tables"])  # Страница "Столики"
+        self.stackedWidget.addWidget(self.pages["orders"])  # Страница "Заказы"
+        self.stackedWidget.addWidget(self.pages["dishes"])  # Страница "Блюда"
+        self.stackedWidget.addWidget(AddDishPage(self.models, self))  # Страница "Добавления блюда"
 
     def switch_page(self, page_name):
         """Переключает активную страницу в QStackedWidget."""
         page_map = {
             "Столики": 0,
             "Заказы": 1,
-            "Блюда": 2
+            "Блюда": 2,
+            "Добавление блюда": 3
         }
         page_index = page_map.get(page_name, 0)
         self.stackedWidget.setCurrentIndex(page_index)
@@ -59,3 +71,5 @@ class MainWindow(QMainWindow):
             self.header.set_active_button(self.header.orders_button)
         elif page_name == "Блюда":
             self.header.set_active_button(self.header.dishes_button)
+        else:
+            self.header.set_active_button(None)
