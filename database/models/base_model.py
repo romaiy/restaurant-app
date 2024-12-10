@@ -9,7 +9,7 @@ class BaseModel(ABC):
     """
     def __init__(self, db_manager: DBManager):
         """
-        Инициализация класса Order.
+        Инициализация класса.
         :param db_manager: Экземпляр DBManager для взаимодействия с базой данных.
         """
         self.db_manager = db_manager
