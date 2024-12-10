@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QFrame, QVBoxLayout
 from PyQt5.QtCore import Qt, pyqtSignal
 
 
@@ -14,7 +14,12 @@ class Header(QWidget):
 
     def setup_ui(self):
         """Создает интерфейс хедера."""
-        layout = QHBoxLayout(self)
+        frame = QFrame(self)
+        frame.setFrameShape(QFrame.StyledPanel)
+        frame.setFrameShadow(QFrame.Raised)
+        frame.setStyleSheet("background-color: #FFFFFF; padding: 0px; margin: 0px; border: none")
+
+        layout = QHBoxLayout(frame)
 
         layout.setContentsMargins(32, 20, 32, 20)
         layout.setSpacing(0)
@@ -22,9 +27,9 @@ class Header(QWidget):
         layout.setObjectName("root")
 
         # Создаем кнопки навигации
-        self.tables_button = QPushButton("Столики", self)
-        self.orders_button = QPushButton("Заказы", self)
-        self.dishes_button = QPushButton("Блюда", self)
+        self.tables_button = QPushButton("Столики")
+        self.orders_button = QPushButton("Заказы")
+        self.dishes_button = QPushButton("Блюда")
 
         self.tables_button.setFixedSize(107, 51)
         self.orders_button.setFixedSize(97, 51)
@@ -37,6 +42,8 @@ class Header(QWidget):
         layout.addWidget(self.orders_button)
         layout.addWidget(self.dishes_button)
 
+        frame.setLayout(layout)
+
         # Подключаем кнопки к слоту для отправки сигнала
         self.tables_button.clicked.connect(lambda: self.buttonClicked.emit("Столики"))
         self.orders_button.clicked.connect(lambda: self.buttonClicked.emit("Заказы"))
@@ -44,6 +51,10 @@ class Header(QWidget):
 
         # Устанавливаем начальную активную кнопку
         self.set_active_button(self.tables_button)
+        
+        self.setLayout(QVBoxLayout())
+        self.layout().setContentsMargins(0, 0, 0, 0)
+        self.layout().addWidget(frame)
 
     def set_default_styles(self):
         """Устанавливает стиль по умолчанию для всех кнопок."""
