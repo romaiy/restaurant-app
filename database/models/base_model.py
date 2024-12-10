@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from database.db_manager import DBManager
 
-
 class BaseModel(ABC):
     """
     Абстрактный базовый класс для всех моделей.

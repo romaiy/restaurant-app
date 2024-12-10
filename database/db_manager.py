@@ -21,12 +21,22 @@ class DBManager:
 
     def create_tables_table(self):
         query = '''
-      CREATE TABLE IF NOT EXISTS tables (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        table_number INTEGER NOT NULL
-      )
-    '''
+        CREATE TABLE IF NOT EXISTS tables (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            table_number INTEGER NOT NULL
+        )
+        '''
         self.execute_query(query)
+
+        # Добавление начальных данных, если таблица пустая
+        check_query = 'SELECT COUNT(*) FROM tables'
+        count = self.execute_query(check_query, fetchone=True)[0]
+
+        if count == 0:  # Если в таблице нет записей
+            initial_tables = [(1,), (2,), (3,), (4,), (5,)]
+            insert_query = 'INSERT INTO tables (table_number) VALUES (?)'
+            self.execute_query_many(insert_query, initial_tables)
+            print("Начальные значения для таблицы 'tables' добавлены.")
 
     def create_employees_table(self):
         query = '''
@@ -85,3 +95,10 @@ class DBManager:
             if fetchall:
                 return cursor.fetchall()
             return None
+
+    def execute_query_many(self, query, values):
+        """Выполняет запрос с несколькими значениями (массовая вставка)."""
+        with self.connect() as conn:
+            cursor = conn.cursor()
+            cursor.executemany(query, values)
+            conn.commit()

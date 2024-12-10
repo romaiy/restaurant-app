@@ -15,13 +15,17 @@ class Header(QWidget):
     def setup_ui(self):
         """Создает интерфейс хедера."""
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(10)
+
+        layout.setContentsMargins(32, 20, 32, 20)
+        layout.setSpacing(0)
+        layout.setObjectName("root")
 
         # Создаем кнопки навигации
         self.tables_button = QPushButton("Столики", self)
         self.orders_button = QPushButton("Заказы", self)
         self.dishes_button = QPushButton("Блюда", self)
+
+        self.set_default_styles()
 
         # Добавляем кнопки в макет
         layout.addWidget(self.tables_button)
@@ -36,10 +40,23 @@ class Header(QWidget):
         # Устанавливаем начальную активную кнопку
         self.set_active_button(self.tables_button)
 
+    def set_default_styles(self):
+        """Устанавливает стиль по умолчанию для всех кнопок."""
+        self.setStyleSheet("""
+            QPushButton {
+                background-color: none;
+                color: #2E2E2E;
+                border-radius: 20px;
+                padding: 16px;
+                width: 20%;
+                font-size: 14px;
+            }  
+        """)
+
     def set_active_button(self, active_button):
         """Устанавливает стиль для активной кнопки."""
         for button in [self.tables_button, self.orders_button, self.dishes_button]:
             if button == active_button:
-                button.setStyleSheet("background-color: lightblue; color: blue; font-weight: bold;")
+                button.setStyleSheet("background-color: lightblue; color: #007AFF")
             else:
-                button.setStyleSheet("background-color: none; color: black;")
+                button.setStyleSheet("background-color: none; color: #2E2E2E")
