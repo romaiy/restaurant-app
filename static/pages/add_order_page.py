@@ -1,16 +1,12 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QFrame
-from PyQt5.QtCore import Qt, pyqtSignal, QSize
+from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QCursor, QIcon
 
 
-class DishesPage(QWidget):
-    addButtonClicked = pyqtSignal(str)  # Сигнал для передачи имени страницы
-
+class AddOrderPage(QWidget):
     def __init__(self, models, parent=None):
         super().__init__(parent)
         self.models = models
-
-        self.add_button = None
 
         self.setStyleSheet("""
             QLabel {
@@ -21,7 +17,25 @@ class DishesPage(QWidget):
             }
         """)
 
+        self.parent = parent
+
+        self.add_button = None
+        self.return_button = None
+
+        self.added_dishes = []
+
         self.setup_ui()
+
+    def return_to_orders(self):
+        self.added_dishes = []
+        self.parent.switch_page("Заказы")
+        self.setup_ui()
+
+    def create_order(self):
+        if len(self.added_dishes):
+            self.models.orders.add(self.added_dishes, 1, 1)
+        else:
+            print("Не выбраны блюда")
 
     def setup_ui(self):
         """Создает интерфейс страницы."""
@@ -34,14 +48,14 @@ class DishesPage(QWidget):
         layout.setSpacing(24)
         layout.setAlignment(Qt.AlignTop)
 
-        label = QLabel("Меню", self)
+        order_number = len(self.models.orders.get_list())
+
+        label = QLabel("Заказ №" + str(order_number + 1), self)
         label.setStyleSheet("font-size: 32px; font-weight: bold; color: #000000")
 
         layout.addWidget(label)
         layout.addWidget(self.create_buttons())
         layout.addWidget(self.create_dish_cards())
-
-        self.add_button.clicked.connect(lambda: self.addButtonClicked.emit("Добавление блюда"))
 
         self.setLayout(layout)
 
@@ -51,7 +65,7 @@ class DishesPage(QWidget):
         main_layout.setAlignment(Qt.AlignLeft)
         main_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.add_button = QPushButton("Добавить блюдо", self)
+        self.add_button = QPushButton("Сохранить заказ", self)
         self.add_button.setCursor(QCursor(Qt.PointingHandCursor))
         self.add_button.setStyleSheet("""
             background-color: #007AFF;
@@ -61,7 +75,22 @@ class DishesPage(QWidget):
         """)
         self.add_button.setFixedSize(194, 54)
 
+        self.add_button.clicked.connect(self.create_order)
+
+        self.return_button = QPushButton("Вернуться без сохранения заказа", self)
+        self.return_button.setCursor(QCursor(Qt.PointingHandCursor))
+        self.return_button.setStyleSheet("""
+            background-color: none;
+            color:  #007AFF;
+            font-size: 16px;
+            border-radius: 8px
+        """)
+        self.return_button.setFixedSize(330, 54)
+
+        self.return_button.clicked.connect(self.return_to_orders)
+
         main_layout.addWidget(self.add_button)
+        main_layout.addWidget(self.return_button)
 
         container_widget = QWidget()
         container_widget.setLayout(main_layout)
@@ -122,49 +151,8 @@ class DishesPage(QWidget):
             row_widget.setFixedSize(115, 52)
             row_widget.setLayout(info_row)
 
-            btn_row = QHBoxLayout()
-            btn_row.setSpacing(10)
-            btn_row.setContentsMargins(0, 0, 0, 0)
-
-            edit_button = QPushButton()
-            edit_button.setCursor(QCursor(Qt.PointingHandCursor))
-            edit_button.setStyleSheet("""
-                padding: 0;
-                margin: 0;
-                background-color: #EFEFEF;
-                border-radius: 6px
-            """)
-            edit_button.setFixedSize(32, 32)
-            edit_icon = QIcon("static/assets/edit.svg")
-            edit_button.setIcon(edit_icon)
-            edit_button.setIconSize(QSize(24, 24))
-
-            delete_button = QPushButton()
-            delete_button.setCursor(QCursor(Qt.PointingHandCursor))
-            delete_button.setStyleSheet("""
-                padding: 0;
-                margin: 0;
-                background-color: #FEE4E0;
-                border-radius: 6px
-            """)
-            delete_button.setFixedSize(32, 32)
-            delete_icon= QIcon("static/assets/delete.svg")
-            delete_button.setIcon(delete_icon)
-            delete_button.setIconSize(QSize(24, 24))
-
-            delete_button.clicked.connect(lambda _, dish_id=dish.id: self.delete_dish(dish_id))
-
-            btn_row.addWidget(edit_button)
-            btn_row.addWidget(delete_button)
-
-            btn_widget = QWidget()
-            btn_widget.setStyleSheet("padding: 0; margin: 0")
-            btn_widget.setFixedSize(74, 32)
-            btn_widget.setLayout(btn_row)
-
             main_column.addWidget(name, alignment=Qt.AlignLeft)
             main_column.addWidget(row_widget, alignment=Qt.AlignLeft)
-            main_column.addWidget(btn_widget, alignment=Qt.AlignLeft)
 
             # Описание
             description_layout = QVBoxLayout()
@@ -216,7 +204,3 @@ class DishesPage(QWidget):
         container_widget.setLayout(main_layout)
 
         return container_widget
-
-    def delete_dish(self, dish_id):
-        self.models.dishes.delete(dish_id)
-        self.setup_ui()

@@ -1,9 +1,11 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QCursor
 
 
 class OrdersPage(QWidget):
+    addButtonClicked = pyqtSignal(str)  # Сигнал для передачи имени страницы
+
     def __init__(self, models, parent=None):
         super().__init__(parent)
         self.models = models
@@ -15,6 +17,9 @@ class OrdersPage(QWidget):
 
     def setup_ui(self):
         """Создает интерфейс страницы."""
+        if self.layout() is not None:
+            QWidget().setLayout(self.layout())
+
         layout = QVBoxLayout(self)
 
         layout.setContentsMargins(24, 40, 24, 40)
@@ -45,6 +50,7 @@ class OrdersPage(QWidget):
             border-radius: 8px
         """)
         self.add_button.setFixedSize(139, 54)
+        self.add_button.clicked.connect(lambda: self.addButtonClicked.emit("Добавление заказа"))
 
         self.clear_button = QPushButton("Очистить историю", self)
         self.clear_button.setCursor(QCursor(Qt.PointingHandCursor))

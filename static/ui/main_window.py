@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QStackedWidget, QWidget
 
+from static.pages.add_order_page import AddOrderPage
 from static.ui.header import Header
 from static.pages.tables_page import TablesPage
 from static.pages.orders_page import OrdersPage
@@ -35,9 +36,12 @@ class MainWindow(QMainWindow):
             "tables": TablesPage(self.models, self),
             "orders": OrdersPage(self.models,  self),
             "dishes": DishesPage(self.models, self),
+            "add_dish": AddDishPage(self.models, self),
+            "add_order": AddOrderPage(self.models, self),
         }
 
         self.pages["dishes"].addButtonClicked.connect(self.switch_page)
+        self.pages["orders"].addButtonClicked.connect(self.switch_page)
 
         self.setup_pages()
 
@@ -52,7 +56,8 @@ class MainWindow(QMainWindow):
         self.stackedWidget.addWidget(self.pages["tables"])  # Страница "Столики"
         self.stackedWidget.addWidget(self.pages["orders"])  # Страница "Заказы"
         self.stackedWidget.addWidget(self.pages["dishes"])  # Страница "Блюда"
-        self.stackedWidget.addWidget(AddDishPage(self.models, self))  # Страница "Добавления блюда"
+        self.stackedWidget.addWidget(self.pages["add_dish"])  # Страница "Добавления блюда"
+        self.stackedWidget.addWidget(self.pages["add_order"])  # Страница "Добавления заказа"
 
     def switch_page(self, page_name):
         """Переключает активную страницу в QStackedWidget."""
@@ -60,7 +65,8 @@ class MainWindow(QMainWindow):
             "Столики": 0,
             "Заказы": 1,
             "Блюда": 2,
-            "Добавление блюда": 3
+            "Добавление блюда": 3,
+            "Добавление заказа": 4
         }
         page_index = page_map.get(page_name, 0)
         self.stackedWidget.setCurrentIndex(page_index)

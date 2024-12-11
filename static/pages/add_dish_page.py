@@ -1,11 +1,9 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor
 
 
 class AddDishPage(QWidget):
-    addButtonClicked = pyqtSignal(str, int, int, str)
-
     def __init__(self, models, parent=None):
         super().__init__(parent)
         self.models = models
@@ -61,6 +59,9 @@ class AddDishPage(QWidget):
 
     def setup_ui(self):
         """Создает интерфейс страницы."""
+        if self.layout() is not None:
+            QWidget().setLayout(self.layout())
+
         main_layout = QVBoxLayout(self)
 
         main_layout.setContentsMargins(24, 40, 24, 40)

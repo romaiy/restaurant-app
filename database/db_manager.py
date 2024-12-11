@@ -48,6 +48,16 @@ class DBManager:
     '''
         self.execute_query(query)
 
+        # Добавление начальных данных, если таблица пустая
+        check_query = 'SELECT COUNT(*) FROM employees'
+        count = self.execute_query(check_query, fetchone=True)[0]
+
+        if count == 0:  # Если в таблице нет записей
+            initial_employees = [("Виктор",), ("Алексей",), ("Егор",), ("Павел",), ("Афанасий",)]
+            insert_query = 'INSERT INTO employees (name) VALUES (?)'
+            self.execute_query_many(insert_query, initial_employees)
+            print("Начальные значения для таблицы 'employees' добавлены.")
+
     def create_orders_table(self):
         query = '''
       CREATE TABLE IF NOT EXISTS orders (
