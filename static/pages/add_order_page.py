@@ -24,6 +24,8 @@ class AddOrderPage(QWidget):
 
         self.added_dishes = []
 
+        self.buttons = {}
+
         self.setup_ui()
 
     def return_to_orders(self):
@@ -34,8 +36,18 @@ class AddOrderPage(QWidget):
     def create_order(self):
         if len(self.added_dishes):
             self.models.orders.add(self.added_dishes, 1, 1)
+            self.parent.pages["orders"].setup_ui()
+            self.return_to_orders()
         else:
             print("Не выбраны блюда")
+
+    def add_or_delete_dish(self, dish_id):
+        if dish_id in self.added_dishes:
+            self.added_dishes.remove(dish_id)
+        else:
+            self.added_dishes.append(dish_id)
+
+        print(self.added_dishes)
 
     def setup_ui(self):
         """Создает интерфейс страницы."""
@@ -112,7 +124,8 @@ class AddOrderPage(QWidget):
         main_layout = QVBoxLayout()
         main_layout.setSpacing(16)
         main_layout.setContentsMargins(0, 0, 0, 0)
-        for idx, dish in enumerate(dishes):
+
+        for dish in dishes:
             card = QFrame()
             card.setFrameShape(QFrame.StyledPanel)
             card.setFrameShadow(QFrame.Raised)
@@ -188,9 +201,37 @@ class AddOrderPage(QWidget):
                 border-radius: 6px
             """)
             plus_btn.setFixedSize(32, 32)
-            plus_icon= QIcon("static/assets/plus.svg")
+
+            plus_icon = QIcon("static/assets/plus.svg")
+            minus_icon = QIcon("static/assets/minus.svg")
+
             plus_btn.setIcon(plus_icon)
             plus_btn.setIconSize(QSize(24, 24))
+
+            self.buttons[dish.id] = plus_btn  # Сохранение кнопки по dish.id
+
+            def update_button_style(dish_id):
+                if dish_id in self.added_dishes:
+                    self.buttons[dish_id].setStyleSheet("""
+                        padding: 0;
+                        margin: 0;
+                        background-color: rgba(228, 241, 255, 1);
+                        border-radius: 6px;
+                    """)
+                    self.buttons[dish_id].setIcon(minus_icon)
+                else:
+                    self.buttons[dish_id].setStyleSheet("""
+                        padding: 0;
+                        margin: 0;
+                        background-color: #EFEFEF; 
+                        border-radius: 6px;
+                    """)
+                    self.buttons[dish_id].setIcon(plus_icon)
+
+            plus_btn.clicked.connect(lambda checked=False, dish_id=dish.id: [
+                self.add_or_delete_dish(dish_id),
+                update_button_style(dish_id)
+            ])
 
             card_layout.addLayout(main_column)
             card_layout.addWidget(description_widget, alignment=Qt.AlignTop)

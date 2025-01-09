@@ -82,7 +82,6 @@ class OrdersPage(QWidget):
 
             return label
 
-
         main_layout = QVBoxLayout()
         main_layout.setSpacing(16)
         main_layout.setContentsMargins(0, 0, 0, 0)
