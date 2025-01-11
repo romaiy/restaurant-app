@@ -1,9 +1,6 @@
-from dataclasses import field
-
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QFrame, QComboBox
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QCursor, QIcon, QPalette
-from gevent.time import sleep
+from PyQt5.QtGui import QCursor, QIcon
 
 from utils.types import ORDER_STATUS
 
@@ -12,6 +9,10 @@ status_by_text = {
     'Ждут заказ': ORDER_STATUS["WAITING"],
     'Готов': ORDER_STATUS["READY"]
 }
+
+status_list = list(status_by_text.values())
+
+text_by_status = {value: key for key, value in status_by_text.items()}
 
 class AddOrderPage(QWidget):
     def __init__(self, models, parent=None):
@@ -32,6 +33,8 @@ class AddOrderPage(QWidget):
         self.return_button = None
 
         self.added_dishes = []
+        self.order_id = None
+        self.edited_order_idx = None
 
         self.buttons = {}
 
@@ -77,6 +80,12 @@ class AddOrderPage(QWidget):
         """)
         self.setup_ui()
 
+    def set_edit_data(self, order_id, edited_order_idx, fields, added_dishes):
+        self.order_id = order_id
+        self.edited_order_idx = edited_order_idx
+        self.fields = fields
+        self.added_dishes = added_dishes
+
     def update_field(self, f, text):
         if f == 'table_id':
             self.fields['table_id'] = int(text)
@@ -85,6 +94,8 @@ class AddOrderPage(QWidget):
 
     def return_to_orders(self):
         self.added_dishes = []
+        self.edited_order_idx = None
+        self.order_id = None
         self.fields = {
             "table_id": 1,
             "status": ORDER_STATUS["CREATED"],
@@ -94,7 +105,11 @@ class AddOrderPage(QWidget):
 
     def create_order(self):
         if len(self.added_dishes):
-            self.models.orders.add(self.added_dishes, 1, self.fields['table_id'], self.fields['status'])
+            if self.order_id:
+                self.models.orders.update(self.order_id, self.fields['status'], self.fields['table_id'], self.added_dishes)
+            else:
+                self.models.orders.add(self.added_dishes, 1, self.fields['table_id'], self.fields['status'])
+
             self.parent.pages["orders"].setup_ui()
             self.return_to_orders()
         else:
@@ -119,7 +134,7 @@ class AddOrderPage(QWidget):
 
         order_number = len(self.models.orders.get_list())
 
-        label = QLabel("Заказ №" + str(order_number + 1), self)
+        label = QLabel("Заказ №" + str(self.edited_order_idx if self.edited_order_idx else order_number + 1), self)
         label.setStyleSheet("font-size: 32px; font-weight: bold; color: #000000")
 
         layout.addWidget(label)
@@ -143,10 +158,10 @@ class AddOrderPage(QWidget):
         table_label = QLabel('Номер столика')
         table_label.setStyleSheet("font-size: 16px; font-weight: medium; color: #2E2E2E; margin-bottom: 8px")
 
-
         self.table_combobox = QComboBox()
         self.table_combobox.addItems(['1', '2', '3', '4', '5'])
         self.table_combobox.setFixedSize(350, 54)
+        self.table_combobox.setCurrentText(str(self.fields['table_id']))
         self.table_combobox.currentTextChanged.connect(lambda text, f='table_id': self.update_field(f, text))
 
         table_layout.addWidget(table_label)
@@ -163,6 +178,7 @@ class AddOrderPage(QWidget):
         self.status_combobox = QComboBox()
         self.status_combobox.addItems(['Создан', 'Ждут заказ', 'Готов'])
         self.status_combobox.setFixedSize(350, 54)
+        self.status_combobox.setCurrentText(text_by_status[self.fields['status']])
         self.status_combobox.currentTextChanged.connect(lambda text, f='status': self.update_field(f, text))
 
         status_layout.addWidget(status_label)
@@ -332,6 +348,8 @@ class AddOrderPage(QWidget):
                         border-radius: 6px;
                     """)
                     self.buttons[dish_id].setIcon(plus_icon)
+
+            update_button_style(dish.id)
 
             plus_btn.clicked.connect(lambda checked=False, dish_id=dish.id: [
                 self.add_or_delete_dish(dish_id),

@@ -1,11 +1,11 @@
 from database.models.base_model import BaseModel
 from collections import namedtuple
 
-Order = namedtuple('Order', ['id', 'table_id', 'employee_id','status', 'created_at', 'items'])
+Order = namedtuple('Order', ['id', 'table_id', 'employee_id','status', 'created_at', 'items', 'item_ids'])
 
 class Orders(BaseModel):
 
-  def add(self, dish_ids, employee_id, table_id, status):
+  def add(self, dish_ids, employee_id, table_id, **status):
     """
     Создает заказ и заполняет таблицу order_items.
 
@@ -38,18 +38,51 @@ class Orders(BaseModel):
       print(f"Ошибка при создании заказа: {e}")
       return None
 
-  def update(self, order_id, **status):
+  def update(self, order_id, status=None, table_id=None, dish_ids=None):
     """
-    Обновляет статус заказа.
+    Обновляет данные заказа, включая статус, table_id и блюда.
     :param order_id: ID заказа.
-    :param status: Новый статус.
+    :param status: Новый статус (опционально).
+    :param table_id: Новый ID столика (опционально).
+    :param dish_ids: Новый список идентификаторов блюд (опционально).
     """
-    query = '''
-    UPDATE orders
-    SET status = ?
-    WHERE id = ?
-    '''
-    self.db_manager.execute_query(query, (status, order_id))
+    try:
+        # Обновление статуса или table_id, если переданы
+        if status or table_id is not None:
+            query = "UPDATE orders SET "
+            updates = []
+            values = []
+
+            if status:
+                updates.append("status = ?")
+                values.append(status)
+
+            if table_id is not None:
+                updates.append("table_id = ?")
+                values.append(table_id)
+
+            query += ", ".join(updates) + " WHERE id = ?"
+            values.append(order_id)
+            self.db_manager.execute_query(query, tuple(values))
+
+        # Обновление order_items, если переданы новые dish_ids
+        if dish_ids is not None:
+            # Удаляем старые записи для данного заказа
+            delete_items_query = "DELETE FROM order_items WHERE order_id = ?"
+            self.db_manager.execute_query(delete_items_query, (order_id,))
+
+            # Добавляем новые записи в order_items
+            add_items_query = """
+                INSERT INTO order_items (order_id, dish_id, quantity)
+                VALUES (?, ?, 1)
+            """
+            items_data = [(order_id, dish_id) for dish_id in dish_ids]
+            self.db_manager.execute_query_many(add_items_query, items_data)
+
+        print(f"Заказ {order_id} успешно обновлен.")
+    except Exception as e:
+        print(f"Ошибка при обновлении заказа {order_id}: {e}")
+
 
   def delete(self, order_id):
     """
@@ -108,7 +141,8 @@ class Orders(BaseModel):
                 o.employee_id,
                 o.status,
                 o.created_at,
-                GROUP_CONCAT(d.name, ', ') AS items
+                GROUP_CONCAT(d.name, ', ') AS items,
+                GROUP_CONCAT(d.id, ',') AS item_ids
             FROM 
                 orders o
             LEFT JOIN 

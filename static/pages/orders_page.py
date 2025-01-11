@@ -42,6 +42,11 @@ class OrdersPage(QWidget):
         self.parent.pages["add_order"].setup_ui()
         self.setup_ui()
 
+    def edit_order(self, order_id, order_idx, fields, dish_ids):
+        self.parent.pages['add_order'].set_edit_data(order_id, order_idx, fields, dish_ids)
+        self.parent.pages["add_order"].setup_ui()
+        self.addButtonClicked.emit("Добавление заказа")
+
     def create_buttons(self):
         main_layout = QHBoxLayout()
         main_layout.setSpacing(16)
@@ -147,6 +152,9 @@ class OrdersPage(QWidget):
             edit_icon = QIcon("static/assets/edit.svg")
             edit_button.setIcon(edit_icon)
             edit_button.setIconSize(QSize(24, 24))
+
+            edit_button.clicked.connect(lambda _, order_id=order.id, table_id=order.table_id, status=order.status, dish_ids=order.item_ids:
+                self.edit_order(order_id, idx + 1, {'table_id': table_id, 'status': status}, list(map(int, dish_ids.split(',')))))
 
             delete_button = QPushButton()
             delete_button.setCursor(QCursor(Qt.PointingHandCursor))
