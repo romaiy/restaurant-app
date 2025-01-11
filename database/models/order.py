@@ -1,8 +1,11 @@
 from database.models.base_model import BaseModel
+from collections import namedtuple
 
-class Order(BaseModel):
+Order = namedtuple('Order', ['id', 'table_id', 'employee_id','status', 'created_at', 'items'])
 
-  def add(self, dish_ids, employee_id, table_id):
+class Orders(BaseModel):
+
+  def add(self, dish_ids, employee_id, table_id, status):
     """
     Создает заказ и заполняет таблицу order_items.
 
@@ -14,9 +17,9 @@ class Order(BaseModel):
       # Создаем запись в таблице orders
       order_query = """
           INSERT INTO orders (employee_id, table_id, status, created_at)
-          VALUES (?, ?, 'CREATE', datetime('now'))
+          VALUES (?, ?, ?, datetime('now'))
       """
-      self.db_manager.execute_query(order_query, (employee_id, table_id))
+      self.db_manager.execute_query(order_query, (employee_id, table_id, status))
 
       # Получаем ID созданного заказа
       order_id_query = "SELECT last_insert_rowid()"
@@ -64,6 +67,23 @@ class Order(BaseModel):
     except Exception as e:
       print(f"Ошибка при удалении заказа: {e}")
 
+  def delete_all_orders(self):
+    """
+    Удаляет все заказы и связанные с ними записи в таблице order_items.
+    """
+    try:
+      # Удаляем все записи из таблицы order_items
+      delete_order_items_query = "DELETE FROM order_items"
+      self.db_manager.execute_query(delete_order_items_query)
+
+      # Удаляем все записи из таблицы orders
+      delete_orders_query = "DELETE FROM orders"
+      self.db_manager.execute_query(delete_orders_query)
+
+      print("Все заказы и связанные записи успешно удалены.")
+    except Exception as e:
+      print(f"Ошибка при удалении всех заказов: {e}")
+
   def get(self, order_id):
     """
     Получает информацию о заказе по его ID.
@@ -79,8 +99,32 @@ class Order(BaseModel):
   def get_list(self):
     """
     Получает список всех заказов.
-    :return: Список словарей с информацией о заказах.
+    :return: Список объектов Order с добавленным полем items.
     """
-    query = 'SELECT * FROM orders'
-    return self.db_manager.execute_query(query, fetchall=True)
+    query = """
+            SELECT 
+                o.id,
+                o.table_id,
+                o.employee_id,
+                o.status,
+                o.created_at,
+                GROUP_CONCAT(d.name, ', ') AS items
+            FROM 
+                orders o
+            LEFT JOIN 
+                order_items oi 
+            ON 
+                o.id = oi.order_id
+            LEFT JOIN 
+                dishes d 
+            ON 
+                oi.dish_id = d.id
+            GROUP BY 
+                o.id
+        """
+    rows = self.db_manager.execute_query(query, fetchall=True)
+    return [Order(*row) for row in rows]
+
+
+
 

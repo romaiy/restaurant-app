@@ -4,6 +4,9 @@ class DBManager:
     def __init__(self, db_name='restaurant.db'):
         self.db_name = db_name
 
+        self.connection = sqlite3.connect(db_name)
+        self.connection.row_factory = sqlite3.Row
+
     def connect(self):
         return sqlite3.connect(self.db_name)
 
@@ -95,21 +98,35 @@ class DBManager:
         self.create_orders_table()
         self.create_order_items_table()
 
-    def execute_query(self, query, params=(), fetchone=False, fetchall=False):
-        with self.connect() as conn:
-            cursor = conn.cursor()
-            cursor.execute(query, params)
-            conn.commit()
-
+    def execute_query(self, query, params=None, fetchone=False, fetchall=False):
+        """
+        Выполняет запрос и возвращает результат, если нужно.
+        """
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(query, params or ())
             if fetchone:
                 return cursor.fetchone()
             if fetchall:
                 return cursor.fetchall()
-            return None
+            self.connection.commit()
+            return cursor  # Вернуть курсор для доступа к lastrowid
+        except Exception as e:
+            self.connection.rollback()
+            raise e
+
+    def close(self):
+        self.connection.close()
 
     def execute_query_many(self, query, values):
-        """Выполняет запрос с несколькими значениями (массовая вставка)."""
-        with self.connect() as conn:
-            cursor = conn.cursor()
+        """
+        Выполняет запрос с несколькими значениями (массовая вставка).
+        """
+        try:
+            cursor = self.connection.cursor()
             cursor.executemany(query, values)
-            conn.commit()
+            self.connection.commit()
+        except Exception as e:
+            self.connection.rollback()
+            raise e
+

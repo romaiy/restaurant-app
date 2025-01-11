@@ -1,21 +1,38 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QFrame
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QCursor, QIcon
+from dataclasses import field
 
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QFrame, QComboBox
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QCursor, QIcon, QPalette
+from gevent.time import sleep
+
+from utils.types import ORDER_STATUS
+
+status_by_text = {
+    'Создан': ORDER_STATUS["CREATED"],
+    'Ждут заказ': ORDER_STATUS["WAITING"],
+    'Готов': ORDER_STATUS["READY"]
+}
+
+id_by_text = {
+    'Первый': 1,
+    'Второй': 2,
+    'Третий': 3,
+    'Четвертый': 4,
+    'Пятый': 5
+}
 
 class AddOrderPage(QWidget):
     def __init__(self, models, parent=None):
         super().__init__(parent)
         self.models = models
 
-        self.setStyleSheet("""
-            QLabel {
-                color: #888888;
-                font-size: 16px;
-                margin: 0;
-                padding: 0;
-            }
-        """)
+        self.fields = {
+            "table_id": 1,
+            "status": ORDER_STATUS["CREATED"],
+        }
+
+        self.table_combobox = None
+        self.status_combobox = None
 
         self.parent = parent
 
@@ -26,16 +43,66 @@ class AddOrderPage(QWidget):
 
         self.buttons = {}
 
+        self.setStyleSheet("""
+            QLabel {
+                color: #888888;
+                font-size: 16px;
+                margin: 0;
+                padding: 0;
+            }
+
+            QComboBox {
+                color: #2E2E2E;
+                margin: 0px;
+                background-color: white;
+                padding-left: 16px;
+                border: 1px solid #E2E2E2;
+                border-radius: 8px;
+                font-size: 16px;
+                max-width: 584px
+            }
+
+            QComboBox::down-arrow {
+                image: url(static/assets/selector.png);
+            }
+
+            QComboBox QAbstractItemView {
+                border: none;
+                selection-background-color: lightgray;
+                background-color: white;
+                padding: 16px 0;
+            }
+
+
+            QComboBox::drop-down {
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 24px;
+                padding-right: 16px;
+                border-top-right-radius: 3px; /* same radius as the QComboBox */
+                border-bottom-right-radius: 3px;
+            }
+        """)
         self.setup_ui()
+
+    def update_field(self, f, text):
+        if f == 'table_id':
+            self.fields['table_id'] = id_by_text[text]
+        else:
+            self.fields['status'] = status_by_text[text]
 
     def return_to_orders(self):
         self.added_dishes = []
+        self.fields = {
+            "table_id": 1,
+            "status": ORDER_STATUS["CREATED"],
+        }
         self.parent.switch_page("Заказы")
         self.setup_ui()
 
     def create_order(self):
         if len(self.added_dishes):
-            self.models.orders.add(self.added_dishes, 1, 1)
+            self.models.orders.add(self.added_dishes, 1, self.fields['table_id'], self.fields['status'])
             self.parent.pages["orders"].setup_ui()
             self.return_to_orders()
         else:
@@ -46,8 +113,6 @@ class AddOrderPage(QWidget):
             self.added_dishes.remove(dish_id)
         else:
             self.added_dishes.append(dish_id)
-
-        print(self.added_dishes)
 
     def setup_ui(self):
         """Создает интерфейс страницы."""
@@ -66,10 +131,35 @@ class AddOrderPage(QWidget):
         label.setStyleSheet("font-size: 32px; font-weight: bold; color: #000000")
 
         layout.addWidget(label)
+        layout.addWidget(self.create_inputs())
         layout.addWidget(self.create_buttons())
         layout.addWidget(self.create_dish_cards())
 
         self.setLayout(layout)
+
+    def create_inputs(self):
+        main_layout = QHBoxLayout()
+        main_layout.setSpacing(16)
+        main_layout.setAlignment(Qt.AlignLeft)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.table_combobox = QComboBox()
+        self.table_combobox.addItems(['Первый', 'Второй', 'Третий', 'Четвертый', 'Пятый'])
+        self.table_combobox.setFixedSize(350, 54)
+        self.table_combobox.currentTextChanged.connect(lambda text, f='table_id': self.update_field(f, text))
+
+        self.status_combobox = QComboBox()
+        self.status_combobox.addItems(['Создан', 'Ждут заказ', 'Готов'])
+        self.status_combobox.setFixedSize(350, 54)
+        self.status_combobox.currentTextChanged.connect(lambda text, f='status': self.update_field(f, text))
+
+        main_layout.addWidget(self.table_combobox)
+        main_layout.addWidget(self.status_combobox)
+
+        container_widget = QWidget()
+        container_widget.setLayout(main_layout)
+
+        return container_widget
 
     def create_buttons(self):
         main_layout = QHBoxLayout()

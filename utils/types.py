@@ -1,0 +1,5 @@
+ORDER_STATUS = {
+    'CREATED': 'CREATED',
+    'WAITING': 'WAITING',
+    'READY': 'READY'
+}
