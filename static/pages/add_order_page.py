@@ -13,14 +13,6 @@ status_by_text = {
     'Готов': ORDER_STATUS["READY"]
 }
 
-id_by_text = {
-    'Первый': 1,
-    'Второй': 2,
-    'Третий': 3,
-    'Четвертый': 4,
-    'Пятый': 5
-}
-
 class AddOrderPage(QWidget):
     def __init__(self, models, parent=None):
         super().__init__(parent)
@@ -87,7 +79,7 @@ class AddOrderPage(QWidget):
 
     def update_field(self, f, text):
         if f == 'table_id':
-            self.fields['table_id'] = id_by_text[text]
+            self.fields['table_id'] = int(text)
         else:
             self.fields['status'] = status_by_text[text]
 
@@ -143,18 +135,41 @@ class AddOrderPage(QWidget):
         main_layout.setAlignment(Qt.AlignLeft)
         main_layout.setContentsMargins(0, 0, 0, 0)
 
+        table_layout = QVBoxLayout()
+        table_layout.setSpacing(0)
+        table_layout.setAlignment(Qt.AlignLeft)
+        table_layout.setContentsMargins(0, 0, 0, 0)
+
+        table_label = QLabel('Номер столика')
+        table_label.setStyleSheet("font-size: 16px; font-weight: medium; color: #2E2E2E; margin-bottom: 8px")
+
+
         self.table_combobox = QComboBox()
-        self.table_combobox.addItems(['Первый', 'Второй', 'Третий', 'Четвертый', 'Пятый'])
+        self.table_combobox.addItems(['1', '2', '3', '4', '5'])
         self.table_combobox.setFixedSize(350, 54)
         self.table_combobox.currentTextChanged.connect(lambda text, f='table_id': self.update_field(f, text))
+
+        table_layout.addWidget(table_label)
+        table_layout.addWidget(self.table_combobox)
+
+        status_layout = QVBoxLayout()
+        status_layout.setSpacing(0)
+        status_layout.setAlignment(Qt.AlignLeft)
+        status_layout.setContentsMargins(0, 0, 0, 0)
+
+        status_label = QLabel('Статус заказа')
+        status_label.setStyleSheet("font-size: 16px; font-weight: medium; color: #2E2E2E; margin-bottom: 8px")
 
         self.status_combobox = QComboBox()
         self.status_combobox.addItems(['Создан', 'Ждут заказ', 'Готов'])
         self.status_combobox.setFixedSize(350, 54)
         self.status_combobox.currentTextChanged.connect(lambda text, f='status': self.update_field(f, text))
 
-        main_layout.addWidget(self.table_combobox)
-        main_layout.addWidget(self.status_combobox)
+        status_layout.addWidget(status_label)
+        status_layout.addWidget(self.status_combobox)
+
+        main_layout.addLayout(table_layout)
+        main_layout.addLayout(status_layout)
 
         container_widget = QWidget()
         container_widget.setLayout(main_layout)
