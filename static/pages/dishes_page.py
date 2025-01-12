@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QFrame
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QFrame, QScrollArea
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QCursor, QIcon
 
@@ -43,7 +43,14 @@ class DishesPage(QWidget):
         layout.addWidget(self.create_buttons())
         layout.addWidget(self.create_dish_cards())
 
-        self.add_button.clicked.connect(lambda: self.addButtonClicked.emit("Добавление блюда"))
+        self.add_button.clicked.connect(lambda:
+            [self.parent.pages['add_dish'].set_edit_data(None, {
+            "name": '',
+            "price": 0,
+            "gram": 0,
+            "description": '',
+            }), self.addButtonClicked.emit("Добавление блюда")]
+        )
 
         self.setLayout(layout)
 
@@ -85,8 +92,17 @@ class DishesPage(QWidget):
         main_layout = QVBoxLayout()
         main_layout.setSpacing(16)
         main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setAlignment(Qt.AlignTop)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll.setStyleSheet("border: none;")
+
+
         for idx, dish in enumerate(dishes):
             card = QFrame()
+            card.setFixedHeight(180)
             card.setFrameShape(QFrame.StyledPanel)
             card.setFrameShadow(QFrame.Raised)
             card.setStyleSheet("background-color: #FFFFFF; padding: 20px; margin: 0px; border-radius: 12px;")
@@ -220,8 +236,9 @@ class DishesPage(QWidget):
 
         container_widget = QWidget()
         container_widget.setLayout(main_layout)
+        scroll.setWidget(container_widget)
 
-        return container_widget
+        return scroll
 
     def delete_dish(self, dish_id):
         self.models.dishes.delete(dish_id)
