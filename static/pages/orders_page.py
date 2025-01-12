@@ -49,6 +49,17 @@ class OrdersPage(QWidget):
         self.parent.pages["add_order"].setup_ui()
         self.addButtonClicked.emit("Добавление заказа")
 
+    def delete_all_orders(self):
+        self.models.orders.delete_all_orders()
+        self.setup_ui()
+        self.parent.pages["add_order"].setup_ui()
+        self.parent.pages["tables"].setup_ui()
+
+    def add_order(self):
+        self.parent.pages['add_order'].set_edit_data(None, None, {"table_id": 1, "status": ORDER_STATUS["CREATED"]},[])
+        self.parent.pages["add_order"].setup_ui()
+        self.addButtonClicked.emit("Добавление заказа")
+
     def create_buttons(self):
         main_layout = QHBoxLayout()
         main_layout.setSpacing(16)
@@ -64,11 +75,7 @@ class OrdersPage(QWidget):
             border-radius: 8px
         """)
         self.add_button.setFixedSize(139, 54)
-        self.add_button.clicked.connect(lambda: [
-            self.parent.pages['add_order'].set_edit_data(None, None, { "table_id": 1, "status": ORDER_STATUS["CREATED"]}, []),
-            self.parent.pages["add_order"].setup_ui(),
-            self.addButtonClicked.emit("Добавление заказа")
-        ])
+        self.add_button.clicked.connect(lambda: self.add_order())
 
         self.clear_button = QPushButton("Очистить историю", self)
         self.clear_button.setCursor(QCursor(Qt.PointingHandCursor))
@@ -79,7 +86,7 @@ class OrdersPage(QWidget):
             border-radius: 8px
         """)
         self.clear_button.setFixedSize(211, 54)
-        self.clear_button.clicked.connect(lambda: [self.models.orders.delete_all_orders(), self.setup_ui(), self.parent.pages["add_order"].setup_ui()])
+        self.clear_button.clicked.connect(lambda: self.delete_all_orders())
 
         main_layout.addWidget(self.add_button)
         main_layout.addWidget(self.clear_button)
@@ -175,7 +182,7 @@ class OrdersPage(QWidget):
             delete_button.setIcon(delete_icon)
             delete_button.setIconSize(QSize(24, 24))
 
-            delete_button.clicked.connect(lambda _, order_id=order.id: self.delete_order(order_id))
+            delete_button.clicked.connect(lambda _, order_id=order.id: [self.delete_order(order_id), self.parent.pages["tables"].setup_ui(), self.parent.pages["add_order"].setup_ui()])
 
             btn_row.addWidget(edit_button)
             btn_row.addWidget(delete_button)

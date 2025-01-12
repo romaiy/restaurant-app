@@ -24,6 +24,8 @@ class AddOrderPage(QWidget):
             "status": ORDER_STATUS["CREATED"],
         }
 
+        self.free_tables = self.models.tables.get_free_tables()
+
         self.table_combobox = None
         self.status_combobox = None
 
@@ -83,7 +85,7 @@ class AddOrderPage(QWidget):
     def set_edit_data(self, order_id, edited_order_idx, fields, added_dishes):
         self.order_id = order_id
         self.edited_order_idx = edited_order_idx
-        self.fields = fields
+        self.fields = fields if order_id else {'table_id': [str(table.table_number) for table in self.free_tables][0], "status": ORDER_STATUS["CREATED"]}
         self.added_dishes = added_dishes
 
     def update_field(self, f, text):
@@ -96,10 +98,6 @@ class AddOrderPage(QWidget):
         self.added_dishes = []
         self.edited_order_idx = None
         self.order_id = None
-        self.fields = {
-            "table_id": 1,
-            "status": ORDER_STATUS["CREATED"],
-        }
         self.parent.switch_page("Заказы")
         self.setup_ui()
 
@@ -111,6 +109,7 @@ class AddOrderPage(QWidget):
                 self.models.orders.add(self.added_dishes, 1, self.fields['table_id'], self.fields['status'])
 
             self.parent.pages["orders"].setup_ui()
+            self.parent.pages["tables"].setup_ui()
             self.return_to_orders()
         else:
             print("Не выбраны блюда")
@@ -125,6 +124,11 @@ class AddOrderPage(QWidget):
         """Создает интерфейс страницы."""
         if self.layout() is not None:
             QWidget().setLayout(self.layout())
+
+        if not self.order_id:
+            self.free_tables = self.models.tables.get_free_tables()
+            self.fields = {'table_id': [str(table.table_number) for table in self.free_tables][0],
+                            "status": ORDER_STATUS["CREATED"]}
 
         layout = QVBoxLayout(self)
 
@@ -159,7 +163,11 @@ class AddOrderPage(QWidget):
         table_label.setStyleSheet("font-size: 16px; font-weight: medium; color: #2E2E2E; margin-bottom: 8px")
 
         self.table_combobox = QComboBox()
-        self.table_combobox.addItems(['1', '2', '3', '4', '5'])
+
+        if self.order_id:
+            self.table_combobox.addItem(str(self.fields['table_id']))
+        self.table_combobox.addItems([str(table.table_number) for table in self.free_tables])
+
         self.table_combobox.setFixedSize(350, 54)
         self.table_combobox.setCurrentText(str(self.fields['table_id']))
         self.table_combobox.currentTextChanged.connect(lambda text, f='table_id': self.update_field(f, text))

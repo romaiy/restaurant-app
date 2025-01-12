@@ -132,6 +132,7 @@ class AddDishPage(QWidget):
             self.parent.pages["dishes"].setup_ui()
             self.parent.pages["orders"].setup_ui()
             self.parent.pages["add_order"].setup_ui()
+            self.parent.pages["tables"].setup_ui()
 
 
     def update_field(self, field, text):

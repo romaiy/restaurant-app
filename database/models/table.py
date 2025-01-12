@@ -1,6 +1,10 @@
 from database.models.base_model import BaseModel
+from collections import namedtuple
 
-class Table(BaseModel):
+Table = namedtuple('Table', ['id', 'table_number', 'status', 'items', 'order_id', 'employee_name'])
+Free_Table = namedtuple('Free_Table', ['id', 'table_number'])
+
+class Tables(BaseModel):
 
   def add(self, table_number):
     """Добавляет новый стол в таблицу."""
@@ -37,5 +41,35 @@ class Table(BaseModel):
 
   def get_list(self):
     """Получает список всех столов."""
-    query = 'SELECT * FROM tables'
-    return self.db_manager.execute_query(query, fetchall=True)
+    query = """
+      SELECT
+        t.id,
+        t.table_number,
+        o.status,
+        GROUP_CONCAT(d.name, ', ') AS items,
+        o.id AS order_id,
+        e.name AS employee_name
+      FROM tables t
+        LEFT JOIN orders o ON t.id = o.table_id
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        LEFT JOIN dishes d ON oi.dish_id = d.id
+        LEFT JOIN employees e ON o.employee_id = e.id
+      GROUP BY 
+        t.id
+    """
+
+    rows = self.db_manager.execute_query(query, fetchall=True)
+    return [Table(*row) for row in rows]
+
+  def get_free_tables(self):
+    """
+    Возвращает список столов, на которых нет заказов.
+    """
+    query = """
+      SELECT t.id, t.table_number
+      FROM tables t
+      LEFT JOIN orders o ON t.id = o.table_id
+      WHERE o.id IS NULL
+    """
+    rows = self.db_manager.execute_query(query, fetchall=True)
+    return [Free_Table(*row) for row in rows]

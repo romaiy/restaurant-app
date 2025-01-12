@@ -5,7 +5,7 @@ Order = namedtuple('Order', ['id', 'table_id', 'employee_id','status', 'created_
 
 class Orders(BaseModel):
 
-  def add(self, dish_ids, employee_id, table_id, **status):
+  def add(self, dish_ids, employee_id, table_id, status):
     """
     Создает заказ и заполняет таблицу order_items.
 
@@ -19,7 +19,7 @@ class Orders(BaseModel):
           INSERT INTO orders (employee_id, table_id, status, created_at)
           VALUES (?, ?, ?, datetime('now'))
       """
-      self.db_manager.execute_query(order_query, (employee_id, table_id, status))
+      self.db_manager.execute_query(order_query, (table_id, table_id, status))
 
       # Получаем ID созданного заказа
       order_id_query = "SELECT last_insert_rowid()"
