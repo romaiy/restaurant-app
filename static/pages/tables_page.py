@@ -59,7 +59,7 @@ class TablesPage(QWidget):
             card.setFrameShadow(QFrame.Raised)
             card.setStyleSheet("background-color: #FFFFFF; padding: 14px; margin: 0px; border-radius: 12px;")
 
-            card.setFixedSize(450, 154)
+            card.setFixedSize(450, 172)
 
             card_layout = QVBoxLayout()
             card_layout.setAlignment(Qt.AlignLeft)
@@ -79,17 +79,28 @@ class TablesPage(QWidget):
                 max-width: {style_by_status[table.status]['width'] if table.status else '50px'};
             """)
 
+            title_layout = QVBoxLayout()
+            title_layout.setAlignment(Qt.AlignLeft)
+            title_layout.setSpacing(2)
+
+            title_description = QLabel(f"официант {table.employee_name}, заказ №{table.order_id}" if table.employee_name else f"официант не назначен")
+            title_description.setAlignment(Qt.AlignTop)
+            title_description.setStyleSheet("font-size: 14px; font-weight: regular; color: rgba(136, 136, 136, 1); padding: 0; margin: 0")
+
             table_number = QLabel(
                 f"№ {table[1]}")
             table_number.setAlignment(Qt.AlignTop)
             table_number.setStyleSheet("font-size: 28px; font-weight: bold; color: #000000; padding: 0; margin: 0")
+
+            title_layout.addWidget(table_number)
+            title_layout.addWidget(title_description)
 
             table_desc = QLabel(table.items if table.items else "Заказа нет")
             table_desc.setAlignment(Qt.AlignTop)
             table_desc.setStyleSheet("font-size: 14px; font-weight: regular; color: #000000; padding: 0; margin: 0")
 
             card_layout.addWidget(table_status)
-            card_layout.addWidget(table_number)
+            card_layout.addLayout(title_layout)
             card_layout.addWidget(table_desc)
 
             card.setLayout(card_layout)

@@ -138,7 +138,7 @@ class OrdersPage(QWidget):
             order_number.setAlignment(Qt.AlignTop)
             order_number.setStyleSheet("font-size: 28px; font-weight: bold; color: #000000; padding: 0; margin: 0")
 
-            order_sheff = QLabel(f"Повар - Соколов Р.М., столик N{order.table_id}")
+            order_sheff = QLabel(f"Повар - Соколов Р.М., столик №{order.table_id}")
             order_sheff.setAlignment(Qt.AlignTop)
             order_sheff.setStyleSheet("font-size: 14px; font-weight: medium; color: #888888; padding: 0; margin: 0")
 

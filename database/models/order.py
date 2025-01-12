@@ -60,6 +60,8 @@ class Orders(BaseModel):
             if table_id is not None:
                 updates.append("table_id = ?")
                 values.append(table_id)
+                updates.append("employee_id = ?")
+                values.append(table_id)
 
             query += ", ".join(updates) + " WHERE id = ?"
             values.append(order_id)
