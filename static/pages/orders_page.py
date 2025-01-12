@@ -2,6 +2,8 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButt
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QCursor, QIcon
 
+from utils.types import ORDER_STATUS
+
 
 class OrdersPage(QWidget):
     addButtonClicked = pyqtSignal(str)  # Сигнал для передачи имени страницы
@@ -62,7 +64,11 @@ class OrdersPage(QWidget):
             border-radius: 8px
         """)
         self.add_button.setFixedSize(139, 54)
-        self.add_button.clicked.connect(lambda: self.addButtonClicked.emit("Добавление заказа"))
+        self.add_button.clicked.connect(lambda: [
+            self.parent.pages['add_order'].set_edit_data(None, None, { "table_id": 1, "status": ORDER_STATUS["CREATED"]}, []),
+            self.parent.pages["add_order"].setup_ui(),
+            self.addButtonClicked.emit("Добавление заказа")
+        ])
 
         self.clear_button = QPushButton("Очистить историю", self)
         self.clear_button.setCursor(QCursor(Qt.PointingHandCursor))

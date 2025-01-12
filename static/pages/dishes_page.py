@@ -99,7 +99,6 @@ class DishesPage(QWidget):
         scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll.setStyleSheet("border: none;")
 
-
         for idx, dish in enumerate(dishes):
             card = QFrame()
             card.setFixedHeight(180)
