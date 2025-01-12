@@ -1,6 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QFrame, QScrollArea
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QFrame, QScrollArea, QFileDialog
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QCursor, QIcon
+
+from utils.upload_file import upload_file
 
 
 class DishesPage(QWidget):
@@ -52,8 +54,17 @@ class DishesPage(QWidget):
             "description": '',
             }), self.addButtonClicked.emit("Добавление блюда")]
         )
+        self.upload_button.clicked.connect(lambda: self.upload_menu_file())
 
         self.setLayout(layout)
+
+    def upload_menu_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Выберите файл с меню", "", "CSV Files (*.csv);;All Files (*)")
+
+        dishes = upload_file(file_path)
+        if len(dishes):
+            self.models.dishes.add_many_dishes(dishes)
+            self.setup_ui()
 
     def create_buttons(self):
         main_layout = QHBoxLayout()

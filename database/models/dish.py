@@ -62,3 +62,18 @@ class Dishes(BaseModel):
     # Создаем объекты Dish из каждой строки
     return [Dish(*row) for row in rows]
 
+  def add_many_dishes(self, dishes):
+    """
+    Добавляет список блюд в базу данных.
+    :param dishes: Список кортежей (name, price, gram, description).
+    """
+    query = """
+        INSERT INTO dishes (name, price, gram, is_allergenic, description)
+        VALUES (?, ?, ?, False, ?)
+    """
+    try:
+      self.db_manager.execute_query_many(query, dishes)
+    except Exception as e:
+      raise RuntimeError(f"Ошибка при добавлении блюд в базу: {e}")
+
+
