@@ -1,3 +1,5 @@
+from dataclasses import field
+
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QHBoxLayout, QPushButton
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCursor
@@ -10,6 +12,8 @@ class AddDishPage(QWidget):
 
         self.parent = parent
 
+        self.dish_id = None
+
         self.fields = {
             "name": '',
             "price": 0,
@@ -18,15 +22,7 @@ class AddDishPage(QWidget):
         }
 
         # Создаём элементы формы
-        self.inputs = {
-            "name": QLineEdit(self.fields["name"]),
-            "price": QLineEdit(str(self.fields["price"])),
-            "gram": QLineEdit(str(self.fields["gram"])),
-            "description": QLineEdit(self.fields["description"]),
-        }
-
-        for field, input_field in self.inputs.items():
-            input_field.textChanged.connect(lambda text, f=field: self.update_field(f, text))
+        self.inputs = None
 
         self.is_allergenic = False
 
@@ -56,6 +52,15 @@ class AddDishPage(QWidget):
         """)
 
         self.setup_ui()
+
+    def set_edit_data(self, dish_id, fields):
+        self.dish_id = dish_id
+        self.fields = fields
+
+        self.inputs["name"].setText(fields['name'])
+        self.inputs["price"].setText(str(fields['price']))
+        self.inputs["gram"].setText(str(fields['gram']))
+        self.inputs["description"].setText(fields['description'])
 
     def setup_ui(self):
         """Создает интерфейс страницы."""
@@ -93,13 +98,23 @@ class AddDishPage(QWidget):
 
     def add_dish(self):
         if all(input_field.text().strip() for input_field in self.inputs.values()):
-            self.models.dishes.add(
-                self.inputs["name"].text(),
-                int(self.inputs["price"].text()),
-                int(self.inputs["gram"].text()),
-                self.is_allergenic,
-                self.inputs["description"].text()
-            )
+            if self.dish_id:
+                self.models.dishes.update(
+                    self.dish_id,
+                    self.inputs["name"].text(),
+                    int(self.inputs["price"].text().replace('.0', '')),
+                    int(self.inputs["gram"].text().replace('.0', '')),
+                    self.is_allergenic,
+                    self.inputs["description"].text()
+                )
+            else:
+                self.models.dishes.add(
+                    self.inputs["name"].text(),
+                    int(self.inputs["price"].text()),
+                    int(self.inputs["gram"].text()),
+                    self.is_allergenic,
+                    self.inputs["description"].text()
+                )
 
             # Очистка всех полей ввода
             for input_field in self.inputs.values():
@@ -111,9 +126,11 @@ class AddDishPage(QWidget):
             self.fields["gram"] = 0
             self.fields["description"] = ''
             self.is_allergenic = False
+            self.dish_id = None
 
             self.parent.switch_page("Блюда")
             self.parent.pages["dishes"].setup_ui()
+            self.parent.pages["orders"].setup_ui()
             self.parent.pages["add_order"].setup_ui()
 
 
@@ -132,6 +149,16 @@ class AddDishPage(QWidget):
         form_layout.setAlignment(Qt.AlignCenter)
         form_layout.setSpacing(0)
         form_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.inputs = {
+            "name": QLineEdit(self.fields["name"]),
+            "price": QLineEdit(str(self.fields["price"])),
+            "gram": QLineEdit(str(self.fields["gram"])),
+            "description": QLineEdit(self.fields["description"]),
+        }
+
+        for field, input_field in self.inputs.items():
+            input_field.textChanged.connect(lambda text, f=field: self.update_field(f, text))
 
         name_label = QLabel("Название блюда")
 

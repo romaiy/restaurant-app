@@ -12,6 +12,8 @@ class DishesPage(QWidget):
 
         self.add_button = None
 
+        self.parent = parent
+
         self.setStyleSheet("""
             QLabel {
                 color: #888888;
@@ -139,6 +141,10 @@ class DishesPage(QWidget):
             edit_button.setIcon(edit_icon)
             edit_button.setIconSize(QSize(24, 24))
 
+            edit_button.clicked.connect(lambda _, dish_id=dish.id, dish_name=dish.name, dish_price=dish.price,
+                dish_gram=dish.gram, dish_desc=dish.description:
+                self.edit_dish(dish_id, {'name': dish_name, 'price': dish_price, 'gram': dish_gram, 'description': dish_desc}))
+
             delete_button = QPushButton()
             delete_button.setCursor(QCursor(Qt.PointingHandCursor))
             delete_button.setStyleSheet("""
@@ -220,3 +226,8 @@ class DishesPage(QWidget):
     def delete_dish(self, dish_id):
         self.models.dishes.delete(dish_id)
         self.setup_ui()
+
+    def edit_dish(self, dish_id, fields):
+        self.parent.pages['add_dish'].set_edit_data(dish_id, fields)
+        self.parent.pages["add_dish"].setup_ui()
+        self.addButtonClicked.emit("Добавление блюда")
