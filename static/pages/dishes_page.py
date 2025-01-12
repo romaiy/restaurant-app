@@ -62,7 +62,7 @@ class DishesPage(QWidget):
         file_path, _ = QFileDialog.getOpenFileName(self, "Выберите файл с меню", "", "CSV Files (*.csv);;All Files (*)")
 
         dishes = upload_file(file_path)
-        if len(dishes):
+        if dishes and len(dishes):
             self.models.dishes.add_many_dishes(dishes)
             self.setup_ui()
 
