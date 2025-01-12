@@ -11,6 +11,7 @@ class DishesPage(QWidget):
         self.models = models
 
         self.add_button = None
+        self.upload_button = None
 
         self.parent = parent
 
@@ -70,7 +71,18 @@ class DishesPage(QWidget):
         """)
         self.add_button.setFixedSize(194, 54)
 
+        self.upload_button = QPushButton("Загрузить меню", self)
+        self.upload_button.setCursor(QCursor(Qt.PointingHandCursor))
+        self.upload_button.setStyleSheet("""
+            background-color: none;
+            color:  #007AFF;
+            font-size: 16px;
+            border-radius: 8px
+        """)
+        self.upload_button.setFixedSize(194, 54)
+
         main_layout.addWidget(self.add_button)
+        main_layout.addWidget(self.upload_button)
 
         container_widget = QWidget()
         container_widget.setLayout(main_layout)
