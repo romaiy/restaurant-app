@@ -75,7 +75,18 @@ class OrdersPage(QWidget):
             border-radius: 8px
         """)
         self.add_button.setFixedSize(139, 54)
-        self.add_button.clicked.connect(lambda: self.add_order())
+        orders = self.models.orders.get_list()
+        tables = self.models.tables.get_list()
+
+        if orders and len(orders) == len(tables):
+            self.add_button.setStyleSheet("""
+                background-color: rgba(0, 122, 255, 0.2);
+                color: rgba(0, 122, 255, 1);
+                font-size: 16px;
+                border-radius: 8px
+            """)
+        else:
+            self.add_button.clicked.connect(lambda: self.add_order())
 
         self.clear_button = QPushButton("Очистить историю", self)
         self.clear_button.setCursor(QCursor(Qt.PointingHandCursor))

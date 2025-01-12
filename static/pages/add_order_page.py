@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QFrame, QComboBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QFrame, QComboBox, QScrollArea
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QCursor, QIcon
 
@@ -85,7 +85,18 @@ class AddOrderPage(QWidget):
     def set_edit_data(self, order_id, edited_order_idx, fields, added_dishes):
         self.order_id = order_id
         self.edited_order_idx = edited_order_idx
-        self.fields = fields if order_id else {'table_id': [str(table.table_number) for table in self.free_tables][0], "status": ORDER_STATUS["CREATED"]}
+        if order_id:
+            self.fields = fields
+        else:
+            free_table_numbers = [str(table.table_number) for table in self.free_tables]
+            if len(free_table_numbers):
+                self.fields = {'table_id': free_table_numbers[0],
+                               "status": ORDER_STATUS["CREATED"]}
+            else:
+                self.fields = {
+                    "table_id": 1,
+                    "status": ORDER_STATUS["CREATED"],
+                }
         self.added_dishes = added_dishes
 
     def update_field(self, f, text):
@@ -127,8 +138,10 @@ class AddOrderPage(QWidget):
 
         if not self.order_id:
             self.free_tables = self.models.tables.get_free_tables()
-            self.fields = {'table_id': [str(table.table_number) for table in self.free_tables][0],
-                            "status": ORDER_STATUS["CREATED"]}
+            free_table_numbers = [str(table.table_number) for table in self.free_tables]
+            if len(free_table_numbers):
+                self.fields = {'table_id': free_table_numbers[0],
+                                "status": ORDER_STATUS["CREATED"]}
 
         layout = QVBoxLayout(self)
 
@@ -254,6 +267,11 @@ class AddOrderPage(QWidget):
         main_layout.setSpacing(16)
         main_layout.setContentsMargins(0, 0, 0, 0)
 
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll.setStyleSheet("border: none;")
+
         for dish in dishes:
             card = QFrame()
             card.setFrameShape(QFrame.StyledPanel)
@@ -374,5 +392,6 @@ class AddOrderPage(QWidget):
 
         container_widget = QWidget()
         container_widget.setLayout(main_layout)
+        scroll.setWidget(container_widget)
 
-        return container_widget
+        return scroll
